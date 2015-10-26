@@ -138,7 +138,7 @@ function Ptero(pos) {
 }
 Ptero.prototype.type = "ptero";
 
-
+var show = false;
 // Main display class. We keep track of the scroll window using it.
 function DOMDisplay(parent, level) {
 
@@ -146,7 +146,6 @@ function DOMDisplay(parent, level) {
   this.wrap = parent.appendChild(elt("div", "game"));
   this.level = level;
   console.log(levelNum);
-  alert("Hey human! Are you ready to play? Collect all the bones and avoid lava and fireballs so I don't die. ENJOY!")
 
   document.getElementById("bullshit").innerHTML = 
     "Level: " + levelNum + " Bones: " + score + " / " + totalCoins[levelNum];
@@ -159,6 +158,9 @@ function DOMDisplay(parent, level) {
 
   // Update the world based on player position
   this.drawFrame();
+
+  if (show)
+    alert(message);
 }
 
 var scale = 20;
@@ -420,17 +422,27 @@ Player.prototype.act = function(step, level, keys) {
 };
 var score = 0;
 var totalCoins = [0, 7, 13, 14, 8];
+var message = "";
 
 Level.prototype.playerTouched = function(type, actor) {
 
   // if the player touches lava and the player hasn't won
   // Player loses
-  if ((type == "lava" || type == "fireball") && this.status == null) {
+  show = true;
+  if (type == "lava" && this.status == null) {
     score = 0;
     this.status = "lost";
     this.finishDelay = 1;
-    console.log(this.status +"DEAD");
-    alert("CRAP! You killed me. DAMN HUMANS.")
+    console.log(this.status + " DEAD");
+    message = "CRAP! You killed me. DAMN HUMANS.";
+    //alert("CRAP! You killed me. DAMN HUMANS.");
+  } else if (type == "fireball" && this.status == null) {
+    score = 0;
+    this.status = "lost";
+    this.finishDelay = 1;
+    console.log(this.status + " DEAD");
+    message = "CRAP! You killed me. DAMN HUMANS.";
+    //alert("CRAP! You killed me. DAMN HUMANS.");
   } else if (type == "coin") {
     console.log(++score + "/" + totalCoins[levelNum]);
     document.getElementById("bullshit").innerHTML = 
@@ -445,7 +457,8 @@ Level.prototype.playerTouched = function(type, actor) {
       this.status = "won";
       this.finishDelay = 1;
       console.log("Level up")
-      alert("Level Up!");
+      //alert("Level Up!");
+      message = "Level up!";
       score = 0;
       levelNum++;
     }
