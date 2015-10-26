@@ -24,7 +24,7 @@
 .won .player {
   box-shadow: -4px -7px 8px white, 4px -7px 8px white;
 }
-.won .background { background-image: url(../img/win.png); }
+
 
 h1 {
     font-family: "Arial", Arial, serif;
