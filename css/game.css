@@ -1,9 +1,9 @@
-.background    { background: url(http://jaredleto.com/thisiswhoireallyam/wp-content/uploads/2013/04/volcano-3.jpg);
+.background    { background: url(http://s22.postimg.org/hsmqkl3n4/volcano.jpg);
                  table-layout: fixed;
                  border-spacing: 0;   }
 .background td { padding: 0;          }
-.lava          { background: rgb(255, 10, 0); }
-.wall          { background: rgb(211,211,211);   }
+.lava          { background-image: url(../img/lava3.gif); }
+.wall          { background-image: url(../img/wall.png); }
 
 .actor   { position: absolute;  }
 .coin    { background-image: url(../img/bone.png); }
@@ -19,7 +19,7 @@
 }
 
 .lost .player {
-  { background-image: url(../img/dead.png);}
+  box-shadow: -4px -7px 8px red, 4px -7px 8px red;
 }
 .won .player {
   box-shadow: -4px -7px 8px white, 4px -7px 8px white;
@@ -29,4 +29,12 @@
 h1 {
     font-family: "Arial", Arial, serif;
     color: #FF6600
+}
+
+#myCanvas{
+  background-image: url(../img/bg.jpg);
+}
+
+audio {
+  display: none;
 }

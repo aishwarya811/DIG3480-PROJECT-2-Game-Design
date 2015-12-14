@@ -42,6 +42,8 @@ function Level(plan) {
         fieldType = "lava";
       else if (ch == "-")
         fieldType = "fireball";
+      else if (ch == "p")
+        fieldType = "ptero";
 
       // "Push" the fieldType, which is a string, onto the gridLine array (at the end).
       gridLine.push(fieldType);
@@ -159,8 +161,8 @@ function DOMDisplay(parent, level) {
   // Update the world based on player position
   this.drawFrame();
 
-  if (show)
-    alert(message);
+  //if (show)
+    //alert(message);
 }
 
 var scale = 20;
@@ -330,16 +332,12 @@ Fireball.prototype.act = function(step, level) {
     this.speed = this.speed.times(-1);
 };
 
-Ptero.prototype.act = function(step, level) {
-  var newPos = this.pos.plus(this.speed.times(step));
-  if (!level.obstacleAt(newPos, this.size)) {
-    this.pos = newPos;
-  }
-  else if (this.repeatPos) {
-    this.pos = this.repeatPos;
-  }
-  else
-    this.speed = this.speed.times(-1);
+Ptero.prototype.act = function(step, level, keys) {
+  this.moveX(step, level, keys);
+
+  var otherActor = level.actorAt(this);
+  if (otherActor)
+    level.pteroTouched(otherActor.type, otherActor);
 };
 
 var maxStep = 0.05;
@@ -365,6 +363,16 @@ Coin.prototype.act = function(step) {
 var maxStep = 0.05;
 
 var playerXSpeed = 7;
+
+Ptero.prototype.moveX = function(step, level, keys) {
+  if (keys.enter) 
+    this.speed = new Vector(-5, 0);
+
+  var motion = new Vector(this.speed.x * step, 0);
+  // Find out where the player character will be in this frame
+  var newPos = this.pos.plus(motion);
+  this.pos = newPos;
+};
 
 Player.prototype.moveX = function(step, level, keys) {
   this.speed.x = 0;
@@ -420,12 +428,12 @@ Player.prototype.act = function(step, level, keys) {
     this.size.y -= step;
   }
 };
+
 var score = 0;
-var totalCoins = [0, 7, 13, 14, 8];
+var totalCoins = [0, 8, 14, 15, 9];
 var message = "";
 
 Level.prototype.playerTouched = function(type, actor) {
-
   // if the player touches lava and the player hasn't won
   // Player loses
   show = true;
@@ -434,15 +442,13 @@ Level.prototype.playerTouched = function(type, actor) {
     this.status = "lost";
     this.finishDelay = 1;
     console.log(this.status + " DEAD");
-    message = "CRAP! You killed me. DAMN HUMANS.";
-    //alert("CRAP! You killed me. DAMN HUMANS.");
+    location.href="lost.html";
   } else if (type == "fireball" && this.status == null) {
     score = 0;
     this.status = "lost";
     this.finishDelay = 1;
     console.log(this.status + " DEAD");
-    message = "CRAP! You killed me. DAMN HUMANS.";
-    //alert("CRAP! You killed me. DAMN HUMANS.");
+    location.href="lost.html";
   } else if (type == "coin") {
     console.log(++score + "/" + totalCoins[levelNum]);
     document.getElementById("bullshit").innerHTML = 
@@ -465,8 +471,34 @@ Level.prototype.playerTouched = function(type, actor) {
   }
 };
 
+Level.prototype.pteroTouched = function(type, actor) {
+  // if the player touches lava and the player hasn't won
+  // Player loses
+  show = true;
+  if (type == "coin") {
+    console.log(++score + "/" + totalCoins[levelNum]);
+    document.getElementById("bullshit").innerHTML = 
+      "Level: " + levelNum + " Bones: " + score + " / " + totalCoins[levelNum];
+    this.actors = this.actors.filter(function(other) {
+      return other != actor;
+    });
+    // If there aren't any coins left, player wins
+    if (!this.actors.some(function(actor) {
+           return actor.type == "coin";
+         })) {
+      this.status = "won";
+      this.finishDelay = 1;
+      console.log("Level up")
+      //alert("Level Up!");
+      message = "Level up!";
+      score = 0;
+      levelNum++;
+    }
+  }
+};
+
 // Arrow key codes for readibility
-var arrowCodes = {37: "left", 38: "up", 39: "right"};
+var arrowCodes = {37: "left", 38: "up", 39: "right", 13:"enter"};
 
 // Translate the codes pressed from a key event
 function trackKeys(codes) {
@@ -527,10 +559,12 @@ function runLevel(level, Display, andThen) {
       display.clear();
       if (andThen)
         andThen(level.status);
-      return false;
+      return false;level = (sessionStorage.getItem('level') == null) ? 0 : sessionStorage.getItem('level');
+  startLevel(level);
     }
   });
 }
+
 
 function runGame(plans, Display) {
   function startLevel(n) {
@@ -547,5 +581,7 @@ function runGame(plans, Display) {
       }
     });
   }
+
   startLevel(0);
 }
+
